@@ -59,10 +59,17 @@ public class MainActivity extends AppCompatActivity{
         //videoItemCeleb.videoUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv");
         videoItemCeleb.subtitleUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.srt");
         videoItems.add(videoItemCeleb);
+
         VideoItem videoItemCartoon= new VideoItem();
         videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv");
         videoItemCartoon.subtitleUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.srt");
         videoItems.add(videoItemCartoon);
+        videosViewPager.setAdapter(new VideosAdapter(videoItems));
+
+        VideoItem videoItemCambr= new VideoItem();
+        videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/cambridge.mp4");
+        videoItemCartoon.subtitleUrl=Uri.parse("http://195.19.44.146:90/cambridge.srt");
+        videoItems.add(videoItemCambr);
         videosViewPager.setAdapter(new VideosAdapter(videoItems));
     }
 

@@ -117,11 +117,14 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             playerView.setPlayer(simpleExoPlayer);
 
-            Format subtitleFormat = Format.createTextSampleFormat(
+           /* Format subtitleFormat = Format.createTextSampleFormat(
                     null,
                     MimeTypes.APPLICATION_SUBRIP,
                     Format.NO_VALUE,
-                    null);
+                    "en");*/
+
+            Format subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP,
+                    null, Format.NO_VALUE, Format.NO_VALUE, "en", null, Format.OFFSET_SAMPLE_RELATIVE);
 
             MediaSource subtitleSource = new SingleSampleMediaSource
                     .Factory(cacheDataSourceFactory)
@@ -132,11 +135,11 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             simpleExoPlayer.prepare(new MergingMediaSource(mediaSource, subtitleSource),false, false);
             showSubtitle(true, simpleExoPlayer);
-            simpleExoPlayer.setPlayWhenReady(true);
+           // simpleExoPlayer.setPlayWhenReady(true); уже есть вызов стр. 142
 
             playerView.setKeepScreenOn(true);
 
-            simpleExoPlayer.prepare(mediaSource);
+        //    simpleExoPlayer.prepare(mediaSource); уже есть вызов на 136 - ты его здесь переопределяла - поэтому субтитры не показывались
 
             simpleExoPlayer.setPlayWhenReady(true);
 
