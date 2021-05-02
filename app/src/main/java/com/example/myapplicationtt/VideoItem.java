@@ -1,5 +1,8 @@
 package com.example.myapplicationtt;
 
+import android.net.Uri;
+
 public class VideoItem {
-    public String videoUrl, videoTitle, videoDescription;
+    public Uri videoUrl;
+    public Uri subtitleUrl;
 }
