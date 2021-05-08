@@ -4,5 +4,5 @@ import android.net.Uri;
 
 public class VideoItem {
     public Uri videoUrl;
-    public Uri subtitleUrl;
+    public String subtitleUrl;
 }

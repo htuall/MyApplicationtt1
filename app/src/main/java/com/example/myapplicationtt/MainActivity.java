@@ -40,6 +40,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,21 +57,23 @@ public class MainActivity extends AppCompatActivity{
 
         VideoItem videoItemCeleb= new VideoItem();
         videoItemCeleb.videoUrl=Uri.parse("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
-        //videoItemCeleb.videoUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv");
-        videoItemCeleb.subtitleUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.srt");
+        videoItemCeleb.subtitleUrl="http://195.19.44.146:90/Friends.S07E01.srt";
         videoItems.add(videoItemCeleb);
 
         VideoItem videoItemCartoon= new VideoItem();
         videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv");
-        videoItemCartoon.subtitleUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.srt");
+        videoItemCartoon.subtitleUrl="http://195.19.44.146:90/Friends.S07E01.srt";
         videoItems.add(videoItemCartoon);
         videosViewPager.setAdapter(new VideosAdapter(videoItems));
 
         VideoItem videoItemCambr= new VideoItem();
         videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/cambridge.mp4");
-        videoItemCartoon.subtitleUrl=Uri.parse("http://195.19.44.146:90/cambridge.srt");
+        videoItemCartoon.subtitleUrl="http://195.19.44.146:90/cambridge.srt";
         videoItems.add(videoItemCambr);
         videosViewPager.setAdapter(new VideosAdapter(videoItems));
     }
+
+
+
 
 }

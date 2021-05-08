@@ -2,21 +2,23 @@ package com.example.myapplicationtt;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.text.TextUtils;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.VideoView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplicationtt.utils.Caption;
+import com.example.myapplicationtt.utils.FormatSRT;
+import com.example.myapplicationtt.utils.TimedTextObject;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -45,6 +47,11 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 
 public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewHolder> {
@@ -77,17 +84,23 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
         return videoItems.size();
     }
 
-    static class VideoViewHolder extends RecyclerView.ViewHolder{
-        PlayerView playerView;
-        ProgressBar progressBar;
+    class VideoViewHolder extends RecyclerView.ViewHolder{
+        private PlayerView playerView;
+        private ProgressBar progressBar;
+        private TextView subtitleText;
+        public TimedTextObject srt;
+        private Handler subtitleDisplayHandler = new Handler();
+
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
             playerView=itemView.findViewById(R.id.player_view);
             progressBar=itemView.findViewById(R.id.progress_bar);
+            subtitleText=itemView.findViewById(R.id.subtitleText);
         }
 
         void setVideoData(VideoItem videoItem){
             SimpleExoPlayer simpleExoPlayer;
+
             CacheDataSourceFactory cacheDataSourceFactory;
             cacheDataSourceFactory = new CacheDataSourceFactory(
                     context,
@@ -106,6 +119,27 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                     context,trackSelector, loadControl
             );
 
+            Runnable subtitleProcessesor = new Runnable() {
+
+                @Override
+                public void run() {
+                    if (simpleExoPlayer != null) {
+                        long currentPos = simpleExoPlayer.getCurrentPosition();
+                        Collection<Caption> subtitles = srt.captions.values();
+                        for (Caption caption : subtitles) {
+                            if (currentPos >= caption.start.mseconds
+                                    && currentPos <= caption.end.mseconds) {
+                                onTimedText(caption);
+                                break;
+                            } else if (currentPos > caption.end.mseconds) {
+                                onTimedText(null);
+                            }
+                        }
+                    }
+                    subtitleDisplayHandler.postDelayed(this, 100);
+                }
+            };
+
             DefaultHttpDataSourceFactory factory= new DefaultHttpDataSourceFactory(//Deprecated.Use DefaultHttpDataSource.Factory instead.
                     "exoplayer_video"
             );
@@ -117,36 +151,17 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             playerView.setPlayer(simpleExoPlayer);
 
-           /* Format subtitleFormat = Format.createTextSampleFormat(
-                    null,
-                    MimeTypes.APPLICATION_SUBRIP,
-                    Format.NO_VALUE,
-                    "en");*/
-
-            Format subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP,
-                    null, Format.NO_VALUE, Format.NO_VALUE, "en", null, Format.OFFSET_SAMPLE_RELATIVE);
-
-            MediaSource subtitleSource = new SingleSampleMediaSource
-                    .Factory(cacheDataSourceFactory)
-                    .createMediaSource(videoItem.subtitleUrl, subtitleFormat, C.TIME_UNSET);
-            CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(Color.YELLOW, Color.TRANSPARENT, Color.TRANSPARENT,
-                    CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, Color.LTGRAY, null);
-            playerView.getSubtitleView().setStyle(captionStyleCompat);
-
-            simpleExoPlayer.prepare(new MergingMediaSource(mediaSource, subtitleSource),false, false);
-            showSubtitle(true, simpleExoPlayer);
-           // simpleExoPlayer.setPlayWhenReady(true); уже есть вызов стр. 142
+            simpleExoPlayer.prepare(mediaSource);
+            showSubtitle(false, simpleExoPlayer);
 
             playerView.setKeepScreenOn(true);
 
-        //    simpleExoPlayer.prepare(mediaSource); уже есть вызов на 136 - ты его здесь переопределяла - поэтому субтитры не показывались
 
             simpleExoPlayer.setPlayWhenReady(true);
 
             simpleExoPlayer.addListener(new Player.EventListener() {
                 @Override
                 public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
-
                 }
 
                 @Override
@@ -198,6 +213,52 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
                 }
             });
+
+
+            class SubtitleProcessingTask extends AsyncTask<String, Void, Void> {
+
+                @Override
+                protected void onPreExecute() {
+                    subtitleText.setText("Loading...");
+                    super.onPreExecute();
+                }
+
+                @Override
+                protected Void doInBackground(String... params) {
+                    try {
+                        InputStream stream = new URL(params[0]).openStream();
+                        FormatSRT formatSRT = new FormatSRT();
+                        srt = formatSRT.parseFile("",stream);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.d("RRR", "error");
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void result) {
+                    if (null != srt) {
+                        subtitleText.setText("");
+                        Toast.makeText(context.getApplicationContext(), "Loaded!",
+                                Toast.LENGTH_SHORT).show();
+                        subtitleDisplayHandler.post(subtitleProcessesor);
+                    }
+                    super.onPostExecute(result);
+                }
+            }
+            SubtitleProcessingTask subsFetchTask = new SubtitleProcessingTask();
+            subsFetchTask.execute(videoItem.subtitleUrl);
+
+        }
+
+        public void onTimedText(Caption text) {
+            if (text == null) {
+                subtitleText.setVisibility(View.INVISIBLE);
+                return;
+            }
+            subtitleText.setText(Html.fromHtml(text.content));
+            subtitleText.setVisibility(View.VISIBLE);
         }
 
         private void showSubtitle(boolean show, SimpleExoPlayer simpleExoPlayer) {
@@ -213,4 +274,13 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
         }
 
     }
+
+
+
+
+
+
+
+
+
 }
