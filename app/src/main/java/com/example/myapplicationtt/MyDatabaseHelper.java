@@ -1,8 +1,12 @@
-package com.example.myapplicationtt;
+/*package com.example.myapplicationtt;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -32,4 +36,27 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+ TABLE_NAME);
         onCreate(db);
     }
-}
+
+    void addVideo(String title, String vurl, String sturl){
+        SQLiteDatabase db= this.getWritableDatabase();
+        ContentValues cv=new ContentValues();
+        cv.put(COLUMN_TITLE, title);
+        cv.put(COLUMN_URL, vurl);
+        cv.put(COLUMN_ST,sturl);
+        long result = db.insert(TABLE_NAME, null,cv);
+        if (result==-1){
+            Toast.makeText(context,"Failed", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context,"Success", Toast.LENGTH_SHORT).show();
+        }
+    }
+    Cursor readData(){
+        String query = "SELECT * FROM " + TABLE_NAME;
+        SQLiteDatabase db= this.getReadableDatabase();
+        Cursor cursor = null;
+        if (db!=null){
+            cursor = db.rawQuery(query, null);
+        }
+        return cursor;
+    }
+}*/

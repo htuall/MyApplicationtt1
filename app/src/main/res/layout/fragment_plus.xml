@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout2"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PlusFragment" >
+
+    <EditText
+        android:id="@+id/ett"
+        android:layout_width="194dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="83dp"
+        android:layout_marginTop="115dp"
+        android:layout_marginEnd="134dp"
+        android:layout_marginBottom="72dp"
+        android:ems="10"
+        android:hint="@string/VideoTitle"
+        android:textColorHint="@color/grey"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/etvurl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etvurl"
+        android:layout_width="197dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="83dp"
+        android:layout_marginEnd="131dp"
+        android:layout_marginBottom="72dp"
+        android:ems="10"
+        android:hint="@string/VideoUrl"
+        android:textColorHint="@color/grey"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/etsurl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/etsurl"
+        android:layout_width="194dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="83dp"
+        android:layout_marginEnd="134dp"
+        android:layout_marginBottom="328dp"
+        android:ems="10"
+        android:hint="@string/SubtitleUrl"
+        android:textSize="18sp"
+        android:textColorHint="@color/grey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="76dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="252dp"
+        android:layout_marginTop="74dp"
+        android:layout_marginEnd="84dp"
+        android:layout_marginBottom="210dp"
+        android:background="@color/light_pink"
+        android:text="Save"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etsurl"
+        app:layout_constraintVertical_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

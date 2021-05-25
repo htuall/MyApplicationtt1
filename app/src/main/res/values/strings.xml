@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">My Applicationtt</string>
+    <string name="app_name">Glow up</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_connection">No internet connection! Cannot be translated!</string>
+    <string name="VideoTitle">Enter title of the video</string>
+    <string name="VideoUrl">Paste url of the video</string>
+    <string name="SubtitleUrl">Paste url of subtitle file</string>
 </resources>

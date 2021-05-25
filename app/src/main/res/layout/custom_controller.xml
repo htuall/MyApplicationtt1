@@ -74,14 +74,15 @@
                 android:src="@drawable/ic_fullscreen"/>
 
         </LinearLayout>
+
         <com.google.android.exoplayer2.ui.DefaultTimeBar
+            android:id="@+id/exo_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/exo_progress"
             android:layout_marginTop="-8dp"
-            app:unplayed_color="#45424E"
             app:buffered_color="#95989F"
-            app:played_color="#FF0000"/>
+            app:played_color="#CCC8C8"
+            app:unplayed_color="#45424E" />
 
     </LinearLayout>
 

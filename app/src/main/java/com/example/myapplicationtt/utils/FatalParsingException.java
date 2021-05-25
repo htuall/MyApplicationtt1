@@ -6,6 +6,7 @@ package com.example.myapplicationtt.utils;
  * @author J. David
  *
  */
+
 public class FatalParsingException extends Exception {
 
 	private static final long serialVersionUID = 6798827566637277804L;

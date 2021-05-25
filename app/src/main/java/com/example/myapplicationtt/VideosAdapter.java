@@ -2,9 +2,17 @@ package com.example.myapplicationtt;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplicationtt.utils.Caption;
@@ -46,19 +56,35 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
 
 public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewHolder> {
     private List<VideoItem> videoItems;
     public static Context context;
-    public VideosAdapter(List<VideoItem> videoItems) {
+    private OnWordListener onWordListener;
+    String translatedText;
+    private boolean connected;
+    public static final String CONNECTIVITY_SERVICE="connectivity";
+
+    public VideosAdapter(List<VideoItem> videoItems, OnWordListener onWordListener) {
         this.videoItems = videoItems;
+        this.onWordListener = onWordListener;
     }
 
     @NonNull
@@ -84,12 +110,14 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
         return videoItems.size();
     }
 
+
     class VideoViewHolder extends RecyclerView.ViewHolder{
         private PlayerView playerView;
         private ProgressBar progressBar;
         private TextView subtitleText;
         public TimedTextObject srt;
         private Handler subtitleDisplayHandler = new Handler();
+        Translate translate;
 
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -124,15 +152,50 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                 @Override
                 public void run() {
                     if (simpleExoPlayer != null) {
+                        ClickableSpan clickableSpan;
                         long currentPos = simpleExoPlayer.getCurrentPosition();
                         Collection<Caption> subtitles = srt.captions.values();
                         for (Caption caption : subtitles) {
                             if (currentPos >= caption.start.mseconds
                                     && currentPos <= caption.end.mseconds) {
-                                onTimedText(caption);
+                                ArrayList<String> arrayList=new ArrayList<>();
+                                String fulltext= String.valueOf(Html.fromHtml(caption.content));
+                                String[] words=fulltext.split(" ");
+                                arrayList.addAll(Arrays.asList(words));
+                                SpannableString spannableString = new SpannableString(fulltext);
+                                ArrayList<String> brokenDownfulltext=new ArrayList<>(Arrays.asList(fulltext.split(" ")));
+                                brokenDownfulltext.retainAll(arrayList);
+                                for (int i=0;i<arrayList.size();i++){
+                                    int indexOfWord = fulltext.indexOf(arrayList.get(i));
+                                    int finalI = i;
+                                    final String[] translated = new String[1];
+                                    clickableSpan = new ClickableSpan() {
+                                        @Override
+                                        public void onClick(@NonNull View widget) {
+                                            if (checkInternetConnection()) {
+                                                //If there is internet connection, get translate service and start translation:
+                                                getTranslateService();
+                                                translated[0]=translate(arrayList.get(finalI));
+
+                                            } else {
+                                                //If not, display "no connection" warning:
+                                                translated[0] =context.getResources().getString(R.string.no_connection);
+                                            }
+                                            Snackbar.make(subtitleText,arrayList.get(finalI)+"\n"+translated[0],Snackbar.LENGTH_LONG).show();
+                                            onWordListener.onWord(arrayList.get(finalI)+" "+translated[0]);
+                                        }
+                                        @Override
+                                        public void updateDrawState(TextPaint ds) {
+                                            super.updateDrawState(ds);
+                                            ds.setUnderlineText(false);
+                                        }
+                                    };
+                                    spannableString.setSpan(clickableSpan, indexOfWord, indexOfWord + arrayList.get(i).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                }
+                                onTimedText(caption, spannableString);
                                 break;
                             } else if (currentPos > caption.end.mseconds) {
-                                onTimedText(null);
+                                onTimedText(null, null);
                             }
                         }
                     }
@@ -252,12 +315,17 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
         }
 
-        public void onTimedText(Caption text) {
+
+
+        public void onTimedText(Caption text,SpannableString spannableString) {
             if (text == null) {
                 subtitleText.setVisibility(View.INVISIBLE);
                 return;
             }
-            subtitleText.setText(Html.fromHtml(text.content));
+
+            subtitleText.setText(spannableString);
+            subtitleText.setMovementMethod(LinkMovementMethod.getInstance());
+            //subtitleText.setHighlightColor(android.R.color.holo_red_light);
             subtitleText.setVisibility(View.VISIBLE);
         }
 
@@ -272,6 +340,49 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             playerView.getSubtitleView().setVisibility(View.VISIBLE);
         }
+        public void getTranslateService() {
+
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+
+            try (InputStream is = context.getResources().openRawResource(R.raw.credentials)) {
+
+                //Get credentials:
+                final GoogleCredentials myCredentials = GoogleCredentials.fromStream(is);
+
+                //Set credentials and get translate service:
+                TranslateOptions translateOptions = TranslateOptions.newBuilder().setCredentials(myCredentials).build();
+                translate = translateOptions.getService();
+
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+
+            }
+        }
+
+        public String translate(String originalText) {
+
+            //Get input text to be translated:
+            Translation translation = translate.translate(originalText, Translate.TranslateOption.targetLanguage("ru"), Translate.TranslateOption.model("base"));
+            translatedText = translation.getTranslatedText();
+
+            //Translated text and original text are set to TextViews:
+            return translatedText;
+
+        }
+
+        public boolean checkInternetConnection() {
+
+            //Check internet connection:
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
+
+            //Means that we are connected to a network (mobile or wi-fi)
+            connected = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                    connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+
+            return connected;
+        }
+
 
     }
 
