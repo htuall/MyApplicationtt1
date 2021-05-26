@@ -35,6 +35,7 @@ android {
         exclude 'project.properties'
         exclude 'META-INF/INDEX.LIST'
     }
+    configurations.implementation.exclude(group: 'com.google.firebase', module: 'protolite-well-known-types')
 }
 
 dependencies {
@@ -58,6 +59,8 @@ dependencies {
     implementation('com.google.cloud:google-cloud-translate:1.12.0') {
         exclude group: 'org.apache.httpcomponents'
         exclude group: 'org.json', module: 'json'
+            exclude group: 'com.google.protobuf'
+
     }
     annotationProcessor 'com.google.cloud:google-cloud-translate:1.12.0'
 
