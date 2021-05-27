@@ -160,6 +160,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                                     && currentPos <= caption.end.mseconds) {
                                 ArrayList<String> arrayList=new ArrayList<>();
                                 String fulltext= String.valueOf(Html.fromHtml(caption.content));
+                                //String[] words = fulltext.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
                                 String[] words=fulltext.split(" ");
                                 arrayList.addAll(Arrays.asList(words));
                                 SpannableString spannableString = new SpannableString(fulltext);
@@ -182,7 +183,7 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                                                 translated[0] =context.getResources().getString(R.string.no_connection);
                                             }
                                             Snackbar.make(subtitleText,arrayList.get(finalI)+"\n"+translated[0],Snackbar.LENGTH_LONG).show();
-                                            onWordListener.onWord(arrayList.get(finalI)+" "+translated[0]);
+                                            onWordListener.onWord(arrayList.get(finalI)+"\n"+translated[0]);
                                         }
                                         @Override
                                         public void updateDrawState(TextPaint ds) {

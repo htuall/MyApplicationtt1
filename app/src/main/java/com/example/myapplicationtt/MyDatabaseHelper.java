@@ -1,4 +1,4 @@
-/*package com.example.myapplicationtt;
+package com.example.myapplicationtt;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 public class MyDatabaseHelper extends SQLiteOpenHelper {
     private Context context;
-    private static final String DATABASE_NAME="Videolib.db";
+    private static final String DATABASE_NAME="VideoLib.db";
     private static final int DATABASE_VERSION=1;
     private static final String TABLE_NAME="my_table";
     private static final String COLUMN_ID="_id";
@@ -59,4 +59,4 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         }
         return cursor;
     }
-}*/
+}

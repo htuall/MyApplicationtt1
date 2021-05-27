@@ -5,4 +5,5 @@
     <string name="VideoTitle">Enter title of the video</string>
     <string name="VideoUrl">Paste url of the video</string>
     <string name="SubtitleUrl">Paste url of subtitle file</string>
+    <string name="profile">Скоро мы добавим авторизацию и здесь будет ваш профиль!</string>
 </resources>
