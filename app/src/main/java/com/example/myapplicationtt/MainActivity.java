@@ -80,10 +80,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         videoItems.add(videoItemCartoon);
 
-        VideoItem videoItemCambr2= new VideoItem(Uri.parse("http://195.19.44.146:90/cambridge.mp4"),
-                "http://195.19.44.146:90/cambridge.srt");
-
-        videoItems.add(videoItemCambr2);
 
         putDataToArray();
 

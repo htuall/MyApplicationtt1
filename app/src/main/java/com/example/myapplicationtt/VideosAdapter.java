@@ -14,9 +14,11 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -109,19 +111,6 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
         return videoItems.size();
     }
 
-    /*@Override
-    public void onChildViewAttachedToWindow(@NonNull View view) {
-
-    }
-
-    @Override
-    public void onChildViewDetachedFromWindow(@NonNull View view) {
-        PlayerView playerView=view.findViewById(R.id.player_view);
-        if (playerView != null) {
-            Player player = playerView.getPlayer();
-            player.stop();
-        }
-    }*/
 
 
     class VideoViewHolder extends RecyclerView.ViewHolder {
@@ -369,5 +358,6 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             return connected;
         }
+
     }
 }
