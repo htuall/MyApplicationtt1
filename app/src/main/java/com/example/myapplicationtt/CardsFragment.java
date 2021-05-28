@@ -17,13 +17,13 @@ import java.util.List;
 public class CardsFragment extends Fragment {
 
     private static final String ARG_PARAM = "cards";
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    //private static final String ARG_PARAM1 = "param1";
+    //private static final String ARG_PARAM2 = "param2";
     private RecyclerView mRecyclerView;
     private CardAdapter mAdapter;
     ArrayList<String> cards= new ArrayList<>();
-    private String mParam1;
-    private String mParam2;
+    //private String mParam1;
+    //private String mParam2;
 
     public CardsFragment() {
 
@@ -33,8 +33,8 @@ public class CardsFragment extends Fragment {
     public static CardsFragment newInstance(String param1, String param2) {
         CardsFragment fragment = new CardsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        //args.putString(ARG_PARAM1, param1);
+        //args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,8 +44,8 @@ public class CardsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             cards = getArguments().getStringArrayList(ARG_PARAM);
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            //mParam1 = getArguments().getString(ARG_PARAM1);
+            //mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 

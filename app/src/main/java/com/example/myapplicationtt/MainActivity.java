@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.database.Cursor;
@@ -15,49 +17,77 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.PlayerView;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, OnWordListener, PutDataToRVListener {
     private ImageButton home, search,plus,poll,acc;
+
     public ArrayList<String> cards;
+
     MyDatabaseHelper mydbh;
+
     List<VideoItem> videoItems;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
         home=findViewById(R.id.house);
+
         search=findViewById(R.id.search);
+
         plus=findViewById(R.id.plus);
+
         poll=findViewById(R.id.poll);
+
         acc=findViewById(R.id.acc);
+
         home.setOnClickListener(this);
+
         search.setOnClickListener(this);
+
         plus.setOnClickListener(this);
+
         poll.setOnClickListener(this);
+
         acc.setOnClickListener(this);
+
         cards = new ArrayList<>();
+
         mydbh= new MyDatabaseHelper(this);
+
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        final ViewPager2 videosViewPager= findViewById(R.id.viewPager2);
+
+        final ViewPager2 videosViewPager = findViewById(R.id.viewPager2);
+
         videoItems = new ArrayList<>();
-
-        //subtitle.subtitleUrl="http://195.19.44.146:90/Friends.S07E01.srt";
-
-        VideoItem videoItemCartoon= new VideoItem(Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv"),
-                "http://195.19.44.146:90/Friends.S07E01.srt");
-        //videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv");
-        //videoItemCartoon.subtitleUrl="http://195.19.44.146:90/Friends.S07E01.srt";
-        videoItems.add(videoItemCartoon);
 
         VideoItem videoItemCambr= new VideoItem(Uri.parse("http://195.19.44.146:90/cambridge.mp4"),
                 "http://195.19.44.146:90/cambridge.srt");
-        //videoItemCartoon.videoUrl=Uri.parse("http://195.19.44.146:90/cambridge.mp4");
-        //videoItemCartoon.subtitleUrl="http://195.19.44.146:90/cambridge.srt";
+
         videoItems.add(videoItemCambr);
+
+        VideoItem videoItemCartoon= new VideoItem(Uri.parse("http://195.19.44.146:90/Friends.S07E01.mkv"),
+                "http://195.19.44.146:90/Friends.S07E01.srt");
+
+        videoItems.add(videoItemCartoon);
+
+        VideoItem videoItemCambr2= new VideoItem(Uri.parse("http://195.19.44.146:90/cambridge.mp4"),
+                "http://195.19.44.146:90/cambridge.srt");
+
+        videoItems.add(videoItemCambr2);
+
         putDataToArray();
+
+
         videosViewPager.setAdapter(new VideosAdapter(videoItems, this::onWord));
 
     }

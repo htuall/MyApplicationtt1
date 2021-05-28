@@ -74,13 +74,12 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewHolder> {
+public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewHolder>{
     private List<VideoItem> videoItems;
     public static Context context;
     private OnWordListener onWordListener;
     String translatedText;
     private boolean connected;
-    public static final String CONNECTIVITY_SERVICE="connectivity";
 
     public VideosAdapter(List<VideoItem> videoItems, OnWordListener onWordListener) {
         this.videoItems = videoItems;
@@ -110,8 +109,22 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
         return videoItems.size();
     }
 
+    /*@Override
+    public void onChildViewAttachedToWindow(@NonNull View view) {
 
-    class VideoViewHolder extends RecyclerView.ViewHolder{
+    }
+
+    @Override
+    public void onChildViewDetachedFromWindow(@NonNull View view) {
+        PlayerView playerView=view.findViewById(R.id.player_view);
+        if (playerView != null) {
+            Player player = playerView.getPlayer();
+            player.stop();
+        }
+    }*/
+
+
+    class VideoViewHolder extends RecyclerView.ViewHolder {
         private PlayerView playerView;
         private ProgressBar progressBar;
         private TextView subtitleText;
@@ -128,12 +141,6 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
         void setVideoData(VideoItem videoItem){
             SimpleExoPlayer simpleExoPlayer;
-
-            CacheDataSourceFactory cacheDataSourceFactory;
-            cacheDataSourceFactory = new CacheDataSourceFactory(
-                    context,
-                    100 * 1024 * 1024,
-                    5 * 1024 * 1024);
 
             LoadControl loadControl = new DefaultLoadControl();
 
@@ -160,7 +167,6 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                                     && currentPos <= caption.end.mseconds) {
                                 ArrayList<String> arrayList=new ArrayList<>();
                                 String fulltext= String.valueOf(Html.fromHtml(caption.content));
-                                //String[] words = fulltext.replaceAll("[^a-zA-Z ]", "").toLowerCase().split("\\s+");
                                 String[] words=fulltext.split(" ");
                                 arrayList.addAll(Arrays.asList(words));
                                 SpannableString spannableString = new SpannableString(fulltext);
@@ -174,12 +180,10 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                                         @Override
                                         public void onClick(@NonNull View widget) {
                                             if (checkInternetConnection()) {
-                                                //If there is internet connection, get translate service and start translation:
                                                 getTranslateService();
                                                 translated[0]=translate(arrayList.get(finalI));
 
                                             } else {
-                                                //If not, display "no connection" warning:
                                                 translated[0] =context.getResources().getString(R.string.no_connection);
                                             }
                                             Snackbar.make(subtitleText,arrayList.get(finalI)+"\n"+translated[0],Snackbar.LENGTH_LONG).show();
@@ -204,11 +208,11 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
                 }
             };
 
-            DefaultHttpDataSourceFactory factory= new DefaultHttpDataSourceFactory(//Deprecated.Use DefaultHttpDataSource.Factory instead.
+            DefaultHttpDataSourceFactory factory= new DefaultHttpDataSourceFactory(
                     "exoplayer_video"
             );
 
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();//Factory for arrays of Extractor instances.
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
             MediaSource mediaSource= new ExtractorMediaSource(videoItem.videoUrl,
                     factory, extractorsFactory, null, null);
@@ -216,7 +220,6 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
             playerView.setPlayer(simpleExoPlayer);
 
             simpleExoPlayer.prepare(mediaSource);
-            showSubtitle(false, simpleExoPlayer);
 
             playerView.setKeepScreenOn(true);
 
@@ -326,21 +329,9 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             subtitleText.setText(spannableString);
             subtitleText.setMovementMethod(LinkMovementMethod.getInstance());
-            //subtitleText.setHighlightColor(android.R.color.holo_red_light);
             subtitleText.setVisibility(View.VISIBLE);
         }
 
-        private void showSubtitle(boolean show, SimpleExoPlayer simpleExoPlayer) {
-            if (simpleExoPlayer == null || playerView.getSubtitleView() == null)
-                return;
-
-            if (!show) {
-                playerView.getSubtitleView().setVisibility(View.GONE);
-                return;
-            }
-
-            playerView.getSubtitleView().setVisibility(View.VISIBLE);
-        }
         public void getTranslateService() {
 
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -348,10 +339,9 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
             try (InputStream is = context.getResources().openRawResource(R.raw.credentials)) {
 
-                //Get credentials:
+
                 final GoogleCredentials myCredentials = GoogleCredentials.fromStream(is);
 
-                //Set credentials and get translate service:
                 TranslateOptions translateOptions = TranslateOptions.newBuilder().setCredentials(myCredentials).build();
                 translate = translateOptions.getService();
 
@@ -363,36 +353,21 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideoViewH
 
         public String translate(String originalText) {
 
-            //Get input text to be translated:
             Translation translation = translate.translate(originalText, Translate.TranslateOption.targetLanguage("ru"), Translate.TranslateOption.model("base"));
             translatedText = translation.getTranslatedText();
 
-            //Translated text and original text are set to TextViews:
             return translatedText;
 
         }
 
         public boolean checkInternetConnection() {
 
-            //Check internet connection:
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
 
-            //Means that we are connected to a network (mobile or wi-fi)
             connected = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
                     connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
 
             return connected;
         }
-
-
     }
-
-
-
-
-
-
-
-
-
 }
